@@ -22,5 +22,11 @@ const result = await client.callTool({
 });
 console.log("Result:", result.content);
 
+const fetchResult = await client.callTool({
+    name: "fetch_page",
+    arguments: { url: "https://example.com" },
+});
+console.log("Fetch result:", fetchResult.content);
+
 // 5. Clean up
 await client.close();
