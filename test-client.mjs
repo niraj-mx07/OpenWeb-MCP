@@ -28,5 +28,11 @@ const fetchResult = await client.callTool({
 });
 console.log("Fetch result:", fetchResult.content);
 
+const searchResult = await client.callTool({
+    name: "web_search",
+    arguments: { query: "model context protocol" },
+});
+console.log("Search result:", searchResult.content);
+
 // 5. Clean up
 await client.close();
