@@ -1,29 +1,40 @@
-import { htmlToText } from "html-to-text";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { z } from "zod";
+import { fetchPage } from "./fetch.mjs";
 
-export async function fetchPage(url) {
-    // 1. Fetch the raw page
-    const response = await fetch(url, {
-        headers: {
-            // Some sites block requests with no User-Agent, pretending to be a browser
-            "User-Agent": "Mozilla/5.0 (compatible; web-mcp-learn/1.0)",
-        },
-    });
+const server = new McpServer({
+    name: "web-mcp-learn",
+    version: "1.0.0",
+});
 
-    if (!response.ok) {
-        throw new Error(`Fetch failed: ${response.status} ${response.statusText}`);
+server.tool(
+    "ping",
+    "Replies with pong plus whatever message you send it.",
+    { message: z.string().describe("Any text you want echoed back") },
+    async ({ message }) => {
+        return {
+            content: [{ type: "text", text: `pong: ${message}` }],
+        };
     }
+);
 
-    const html = await response.text();
+server.tool(
+    "fetch_page",
+    "Fetches a URL and returns its text content.",
+    { url: z.string().url().describe("The URL to fetch") },
+    async ({ url }) => {
+        try {
+            const text = await fetchPage(url);
+            return { content: [{ type: "text", text }] };
+        } catch (err) {
+            return {
+                content: [{ type: "text", text: `Error fetching ${url}: ${err.message}` }],
+                isError: true,
+            };
+        }
+    }
+);
 
-    // 2. Convert HTML -> plain text, dropping script/style tags entirely
-    const text = htmlToText(html, {
-        wordwrap: false,
-        selectors: [
-            { selector: "script", format: "skip" },
-            { selector: "style", format: "skip" },
-            { selector: "a", options: { ignoreHref: false } }, // keep links, like the original's "preserve link format"
-        ],
-    });
-
-    return text.trim();
-}
+const transport = new StdioServerTransport();
+await server.connect(transport);
