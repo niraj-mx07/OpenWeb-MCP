@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { fetchPage } from "./fetch.mjs";
+import { webSearch } from "./search.mjs";
 
 const server = new McpServer({
   name: "web-mcp-learn",
@@ -20,16 +21,16 @@ server.tool(
 );
 
 server.tool(
-  "fetch_page",
-  "Fetches a URL and returns its text content.",
-  { url: z.string().url().describe("The URL to fetch") },
-  async ({ url }) => {
+  "web_search",
+  "Searches the web and returns a list of results with title, url, and snippet.",
+  { query: z.string().describe("The search query") },
+  async ({ query }) => {
     try {
-      const text = await fetchPage(url);
-      return { content: [{ type: "text", text }] };
+      const results = await webSearch(query);
+      return { content: [{ type: "text", text: JSON.stringify(results, null, 2) }] };
     } catch (err) {
       return {
-        content: [{ type: "text", text: `Error fetching ${url}: ${err.message}` }],
+        content: [{ type: "text", text: `Error searching: ${err.message}` }],
         isError: true,
       };
     }
