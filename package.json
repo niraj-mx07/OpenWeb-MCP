@@ -12,7 +12,9 @@
   "type": "commonjs",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
+    "@mozilla/readability": "^0.6.0",
     "cheerio": "^1.2.0",
-    "html-to-text": "^10.0.1"
+    "html-to-text": "^10.0.1",
+    "jsdom": "^30.0.1"
   }
 }
