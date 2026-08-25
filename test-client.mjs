@@ -34,5 +34,12 @@ const searchResult = await client.callTool({
 });
 console.log("Search result:", searchResult.content);
 
+const readableResult = await client.callTool({
+    name: "fetch_page",
+    arguments: { url: "https://en.wikipedia.org/wiki/Model_Context_Protocol", mode: "readable" },
+});
+console.log("Readable result (first 500 chars):",
+    readableResult.content[0].text.slice(0, 500));
+
 // 5. Clean up
 await client.close();

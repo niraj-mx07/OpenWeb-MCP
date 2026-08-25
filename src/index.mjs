@@ -68,6 +68,26 @@ server.tool(
     }
   }
 );
+server.tool(
+  "fetch_page",
+  "Fetches a URL and returns its content. Use mode 'readable' for articles/blog posts (strips nav/ads), 'text' for everything else.",
+  {
+    url: z.string().url().describe("The URL to fetch"),
+    mode: z.enum(["text", "readable"]).default("text").describe("Extraction mode"),
+  },
+  async ({ url, mode }) => {
+    try {
+      const result = await fetchPage(url, mode);
+      const text = result.title ? `# ${result.title}\n\n${result.text}` : result.text;
+      return { content: [{ type: "text", text }] };
+    } catch (err) {
+      return {
+        content: [{ type: "text", text: `Error fetching ${url}: ${err.message}` }],
+        isError: true,
+      };
+    }
+  }
+);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
