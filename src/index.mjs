@@ -21,6 +21,23 @@ server.tool(
 );
 
 server.tool(
+  "fetch_page",
+  "Fetches a URL and returns its text content.",
+  { url: z.string().url().describe("The URL to fetch") },
+  async ({ url }) => {
+    try {
+      const text = await fetchPage(url);
+      return { content: [{ type: "text", text }] };
+    } catch (err) {
+      return {
+        content: [{ type: "text", text: `Error fetching ${url}: ${err.message}` }],
+        isError: true,
+      };
+    }
+  }
+);
+
+server.tool(
   "web_search",
   "Searches the web and returns a list of results with title, url, and snippet.",
   { query: z.string().describe("The search query") },
