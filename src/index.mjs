@@ -3,6 +3,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { fetchPage } from "./fetch.mjs";
 import { webSearch } from "./search.mjs";
+import { readRecentLogs, getStats } from "./log.mjs";
 
 const server = new McpServer({
   name: "web-mcp-learn",
@@ -50,6 +51,20 @@ server.tool(
         content: [{ type: "text", text: `Error searching: ${err.message}` }],
         isError: true,
       };
+    }
+  }
+);
+server.tool(
+  "web_log",
+  "View recent search/fetch activity logs, or aggregate stats per engine.",
+  { action: z.enum(["recent", "stats"]).describe("'recent' for latest log entries, 'stats' for per-engine success/fail counts") },
+  async ({ action }) => {
+    if (action === "stats") {
+      const stats = await getStats();
+      return { content: [{ type: "text", text: JSON.stringify(stats, null, 2) }] };
+    } else {
+      const logs = await readRecentLogs(20);
+      return { content: [{ type: "text", text: JSON.stringify(logs, null, 2) }] };
     }
   }
 );
