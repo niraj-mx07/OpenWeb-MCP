@@ -23,11 +23,15 @@ server.tool(
 
 server.tool(
   "fetch_page",
-  "Fetches a URL and returns its text content.",
-  { url: z.string().url().describe("The URL to fetch") },
-  async ({ url }) => {
+  "Fetches a URL and returns its content. Use mode 'readable' for articles/blog posts (strips nav/ads), 'text' for everything else.",
+  {
+    url: z.string().url().describe("The URL to fetch"),
+    mode: z.enum(["text", "readable"]).default("text").describe("Extraction mode"),
+  },
+  async ({ url, mode }) => {
     try {
-      const text = await fetchPage(url);
+      const result = await fetchPage(url, mode);
+      const text = result.title ? `# ${result.title}\n\n${result.text}` : result.text;
       return { content: [{ type: "text", text }] };
     } catch (err) {
       return {
@@ -54,6 +58,7 @@ server.tool(
     }
   }
 );
+
 server.tool(
   "web_log",
   "View recent search/fetch activity logs, or aggregate stats per engine.",
@@ -65,26 +70,6 @@ server.tool(
     } else {
       const logs = await readRecentLogs(20);
       return { content: [{ type: "text", text: JSON.stringify(logs, null, 2) }] };
-    }
-  }
-);
-server.tool(
-  "fetch_page",
-  "Fetches a URL and returns its content. Use mode 'readable' for articles/blog posts (strips nav/ads), 'text' for everything else.",
-  {
-    url: z.string().url().describe("The URL to fetch"),
-    mode: z.enum(["text", "readable"]).default("text").describe("Extraction mode"),
-  },
-  async ({ url, mode }) => {
-    try {
-      const result = await fetchPage(url, mode);
-      const text = result.title ? `# ${result.title}\n\n${result.text}` : result.text;
-      return { content: [{ type: "text", text }] };
-    } catch (err) {
-      return {
-        content: [{ type: "text", text: `Error fetching ${url}: ${err.message}` }],
-        isError: true,
-      };
     }
   }
 );
