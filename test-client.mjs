@@ -41,5 +41,11 @@ const readableResult = await client.callTool({
 console.log("Readable result (first 500 chars):",
     readableResult.content[0].text.slice(0, 500));
 
+const codeSearch = await client.callTool({
+    name: "web_search",
+    arguments: { query: "how to fix python typeerror" },
+});
+console.log("Code search:", codeSearch.content);
+
 // 5. Clean up
 await client.close();

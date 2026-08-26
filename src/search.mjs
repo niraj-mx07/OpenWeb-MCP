@@ -1,11 +1,10 @@
 import { searchDuckDuckGo } from "./engines/duckduckgo.mjs";
 import { searchWikipedia } from "./engines/wikipedia.mjs";
+import { searchGitHub } from "./engines/github.mjs";
 import { withTimeout } from "./timeout.mjs";
 import { isCoolingDown, setCooldown } from "./cooldown.mjs";
 import { detectIntent } from "./intent.mjs";
 import { logEvent } from "./log.mjs";
-import { searchWikipedia } from "./engines/wikipedia.mjs";
-import { searchGitHub } from "./engines/github.mjs";
 
 const TIME_BOX_MS = 5000;
 const COOLDOWN_MS = 60000;
@@ -17,7 +16,7 @@ const ENGINES = {
 };
 
 const ROUTES = {
-  code: ["duckduckgo"],
+  code: ["github", "duckduckgo"],
   academic: ["wikipedia", "duckduckgo"],
   news: ["duckduckgo"],
   general: ["duckduckgo", "wikipedia"],
